@@ -13,6 +13,8 @@ import com.example.taskmate.Model.TaskModel;
 import com.example.taskmate.R;
 import com.firebase.ui.database.FirebaseRecyclerAdapter;
 import com.firebase.ui.database.FirebaseRecyclerOptions;
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.FirebaseDatabase;
 
 import java.util.List;
 import java.util.zip.Inflater;
@@ -25,6 +27,29 @@ public class TaskAdapter extends FirebaseRecyclerAdapter<TaskModel,TaskAdapter.o
 
     @Override
     protected void onBindViewHolder(@NonNull onviewholder holder, int position, @NonNull TaskModel model) {
+
+        holder.title.setText(model.getTitle());
+        holder.date.setText(model.getDate());
+        holder.description.setText(model.getDescription());
+        holder.time.setText(model.getTime());
+
+        holder.delete.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+
+                FirebaseDatabase.getInstance().getReference("Tasks").child(FirebaseAuth.getInstance().getCurrentUser().getUid())
+                        .child(model.getKey()).removeValue();
+
+            }
+        });
+
+        holder.edit.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+
+            }
+        });
+
 
 
     }

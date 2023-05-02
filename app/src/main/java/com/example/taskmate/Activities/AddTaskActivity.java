@@ -1,5 +1,9 @@
 package com.example.taskmate.Activities;
 
+import static com.example.taskmate.Activities.Constants.ErrorToast;
+import static com.example.taskmate.Activities.Constants.SuccessToast;
+
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.annotation.SuppressLint;
@@ -13,12 +17,15 @@ import com.example.taskmate.Adapter.TaskAdapter;
 import com.example.taskmate.Model.TaskModel;
 import com.example.taskmate.R;
 import com.example.taskmate.databinding.ActivityAddTaskBinding;
+import com.google.android.gms.tasks.OnFailureListener;
+import com.google.android.gms.tasks.OnSuccessListener;
 import com.google.android.material.datepicker.CalendarConstraints;
 import com.google.android.material.datepicker.DateValidatorPointForward;
 import com.google.android.material.datepicker.MaterialDatePicker;
 import com.google.android.material.datepicker.MaterialPickerOnPositiveButtonClickListener;
 import com.google.android.material.timepicker.MaterialTimePicker;
 import com.google.android.material.timepicker.TimeFormat;
+import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 
@@ -36,6 +43,7 @@ public class AddTaskActivity extends AppCompatActivity {
 
     FirebaseDatabase database ;
     DatabaseReference reference ;
+    FirebaseAuth auth ;
 
 
 
@@ -47,6 +55,7 @@ public class AddTaskActivity extends AppCompatActivity {
 
         database  = FirebaseDatabase.getInstance();
         reference = database.getReference("Tasks");
+        auth = FirebaseAuth.getInstance();
 
 
         binding.date.setOnClickListener(new View.OnClickListener() {
@@ -117,11 +126,7 @@ public class AddTaskActivity extends AppCompatActivity {
             @Override
             public void onClick(View view) {
 
-                ProgressDialog pd = new ProgressDialog(AddTaskActivity.this);
-                pd.setTitle("Uploading Task");
-                pd.setMessage("Please Wait...");
-                pd.setCancelable(false);
-                pd.setCanceledOnTouchOutside(false);
+                ProgressDialog pd = Constants.progressDialog(binding.submit.getContext(),"Adding Task","Please Wait...");
 
 
 
@@ -129,6 +134,7 @@ public class AddTaskActivity extends AppCompatActivity {
                 String description  = binding.etDescription.getText().toString();
                 String date  = binding.etDate.getText().toString();
                 String time  = binding.etTime.getText().toString();
+                String key = reference.push().getKey();
 
                 if (TextUtils.isEmpty(title))
                 {
@@ -154,12 +160,31 @@ public class AddTaskActivity extends AppCompatActivity {
 
                 pd.show();
 
-
-
-
+                TaskModel model = new TaskModel(title,description,date,time,key);
+                reference.child(auth.getCurrentUser().getUid()).child(key).setValue(model)
+                        .addOnSuccessListener(new OnSuccessListener<Void>() {
+                            @Override
+                            public void onSuccess(Void unused) {
+                                SuccessToast(getApplicationContext(),"Task Has SuccessFully Added");
+                                pd.dismiss();
+                                startActivity(new Intent(getApplicationContext(), MainActivity.class));
+                            }
+                        })
+                        .addOnFailureListener(new OnFailureListener() {
+                            @Override
+                            public void onFailure(@NonNull Exception e) {
+                                ErrorToast(getApplicationContext(),"Failed To Add Task : "+e.getMessage());
+                                pd.dismiss();
+                            }
+                        });
 
             }
         });
 
+    }
+
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
     }
 }

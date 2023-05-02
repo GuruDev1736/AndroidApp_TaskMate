@@ -1,13 +1,24 @@
 package com.example.taskmate.Activities;
 
+import androidx.annotation.RequiresApi;
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.Manifest;
 import android.content.Intent;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 
+import com.example.taskmate.Authentication.LoginActivity;
 import com.example.taskmate.R;
 import com.example.taskmate.databinding.ActivitySplashBinding;
+import com.karumi.dexter.Dexter;
+import com.karumi.dexter.MultiplePermissionsReport;
+import com.karumi.dexter.PermissionToken;
+import com.karumi.dexter.listener.PermissionRequest;
+import com.karumi.dexter.listener.multi.MultiplePermissionsListener;
+
+import java.util.List;
 
 public class SplashActivity extends AppCompatActivity {
 
@@ -19,14 +30,27 @@ public class SplashActivity extends AppCompatActivity {
         binding = ActivitySplashBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
 
+        Dexter.withContext(SplashActivity.this).withPermissions(Manifest.permission.POST_NOTIFICATIONS, Manifest.permission.SCHEDULE_EXACT_ALARM,Manifest.permission.SET_ALARM
+        ,Manifest.permission.VIBRATE,Manifest.permission.WAKE_LOCK,Manifest.permission.RECEIVE_BOOT_COMPLETED,Manifest.permission.FOREGROUND_SERVICE)
+                .withListener(new MultiplePermissionsListener() {
+                    @Override
+                    public void onPermissionsChecked(MultiplePermissionsReport multiplePermissionsReport) {
+
+                    }
+
+                    @Override
+                    public void onPermissionRationaleShouldBeShown(List<PermissionRequest> list, PermissionToken permissionToken) {
+                        permissionToken.continuePermissionRequest();
+                    }
+                });
+
         new Handler().postDelayed(new Runnable() {
             @Override
             public void run() {
-                startActivity(new Intent(getApplicationContext(),MainActivity.class));
+                startActivity(new Intent(SplashActivity.this, LoginActivity.class));
                 finish();
             }
         },2000);
-
 
     }
 }

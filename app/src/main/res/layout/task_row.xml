@@ -17,7 +17,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:background="@color/white"
-        android:padding="16dp">
+        android:padding="10dp">
 
 
         <ImageView
@@ -26,8 +26,6 @@
             android:layout_height="80dp"
             android:layout_alignParentStart="true"
             android:layout_alignParentTop="true"
-            android:layout_marginStart="0dp"
-            android:layout_marginTop="8dp"
             android:src="@drawable/tasklogo" />
 
         <TextView
@@ -35,10 +33,10 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_alignParentTop="true"
-            android:layout_marginStart="4dp"
+            android:layout_marginStart="10dp"
             android:layout_marginTop="5dp"
             android:layout_toEndOf="@id/img1"
-            android:gravity="center"
+            android:gravity="left"
             android:text="Title"
             android:textColor="@color/black"
             android:textSize="15sp"
@@ -52,7 +50,7 @@
             android:layout_alignStart="@+id/title"
             android:layout_alignEnd="@+id/title"
             android:layout_marginEnd="0dp"
-            android:gravity="center"
+            android:gravity="left"
             android:text="Description"
             android:textColor="@color/black" />
 
@@ -64,8 +62,8 @@
             android:layout_alignStart="@+id/title"
             android:layout_alignEnd="@+id/title"
             android:layout_marginEnd="0dp"
-            android:gravity="center"
-            android:text="Year"
+            android:gravity="left"
+            android:text="Date"
             android:textColor="@color/black" />
 
         <TextView
@@ -76,17 +74,17 @@
             android:layout_alignStart="@+id/title"
             android:layout_alignEnd="@+id/title"
             android:layout_marginEnd="0dp"
-            android:gravity="center"
-            android:text="Phone No"
+            android:gravity="left"
+            android:text="Time"
             android:textColor="@color/black" />
 
-        <Button
+        <com.google.android.material.button.MaterialButton
             android:id="@+id/edit"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_below="@+id/img1"
             android:layout_alignStart="@+id/img1"
-            android:layout_marginTop="20dp"
+            android:layout_marginTop="10dp"
             android:clickable="true"
             android:focusable="true"
             android:text="Edit"
@@ -94,14 +92,14 @@
             android:textSize="20sp"
             android:textStyle="bold" />
 
-        <Button
+        <com.google.android.material.button.MaterialButton
             android:id="@+id/delete"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_alignTop="@+id/edit"
+            android:layout_alignEnd="@+id/time"
             android:layout_alignBottom="@+id/edit"
             android:layout_alignParentEnd="true"
-            android:layout_marginEnd="20dp"
             android:backgroundTint="#FF0000"
             android:clickable="true"
             android:focusable="true"
@@ -109,9 +107,6 @@
             android:textColor="@color/white"
             android:textSize="20sp"
             android:textStyle="bold" />
-
-
-
 
     </RelativeLayout>
 

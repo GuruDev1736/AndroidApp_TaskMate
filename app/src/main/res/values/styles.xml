@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="CustomProgressDialog" parent="Theme.AppCompat.Light.Dialog.Alert">
+        <item name="colorAccent">@color/main</item>
+    </style>
+</resources>
