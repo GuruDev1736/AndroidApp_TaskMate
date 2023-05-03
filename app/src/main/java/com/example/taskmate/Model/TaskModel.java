@@ -15,6 +15,13 @@ public class TaskModel {
         this.key = key;
     }
 
+    public TaskModel(String title, String description, String date, String time) {
+        this.title = title;
+        this.description = description;
+        this.date = date;
+        this.time = time;
+    }
+
     public TaskModel() {
     }
 
