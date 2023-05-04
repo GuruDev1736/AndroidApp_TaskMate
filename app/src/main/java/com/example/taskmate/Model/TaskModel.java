@@ -5,7 +5,16 @@ import android.os.Parcelable;
 
 public class TaskModel {
 
-    String title , description , date , time , key ;
+    String title , description , date , time , key , category ;
+
+    public TaskModel(String title, String description, String date, String time, String key, String category) {
+        this.title = title;
+        this.description = description;
+        this.date = date;
+        this.time = time;
+        this.key = key;
+        this.category = category;
+    }
 
     public TaskModel(String title, String description, String date, String time, String key) {
         this.title = title;
@@ -13,13 +22,6 @@ public class TaskModel {
         this.date = date;
         this.time = time;
         this.key = key;
-    }
-
-    public TaskModel(String title, String description, String date, String time) {
-        this.title = title;
-        this.description = description;
-        this.date = date;
-        this.time = time;
     }
 
     public TaskModel() {
@@ -63,5 +65,13 @@ public class TaskModel {
 
     public void setKey(String key) {
         this.key = key;
+    }
+
+    public String getCategory() {
+        return category;
+    }
+
+    public void setCategory(String category) {
+        this.category = category;
     }
 }

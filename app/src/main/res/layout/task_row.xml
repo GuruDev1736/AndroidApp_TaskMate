@@ -78,11 +78,23 @@
             android:text="Time"
             android:textColor="@color/black" />
 
+  <TextView
+            android:id="@+id/category"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/time"
+            android:layout_alignStart="@+id/title"
+            android:layout_alignEnd="@+id/title"
+            android:layout_marginEnd="0dp"
+            android:gravity="left"
+            android:text="Category"
+            android:textColor="@color/black" />
+
         <com.google.android.material.button.MaterialButton
             android:id="@+id/edit"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_below="@+id/img1"
+            android:layout_below="@+id/category"
             android:layout_alignStart="@+id/img1"
             android:layout_marginTop="10dp"
             android:clickable="true"

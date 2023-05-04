@@ -17,14 +17,20 @@ import android.os.Bundle;
 import com.example.taskmate.Adapter.ReminderBroadcast;
 import com.example.taskmate.Adapter.TaskAdapter;
 import com.example.taskmate.Model.TaskModel;
+import com.example.taskmate.R;
 import com.firebase.ui.database.FirebaseRecyclerOptions;
 import com.google.android.material.snackbar.Snackbar;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.text.Editable;
+import android.text.TextWatcher;
+import android.view.MenuInflater;
 import android.view.View;
 
+import androidx.appcompat.widget.SearchView;
+import androidx.appcompat.widget.Toolbar;
 import androidx.core.view.WindowCompat;
 import androidx.navigation.NavController;
 import androidx.navigation.Navigation;
@@ -34,8 +40,11 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 
 import com.example.taskmate.databinding.ActivityMainBinding;
 import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.Query;
+import com.google.firebase.database.ValueEventListener;
 import com.karumi.dexter.Dexter;
 import com.karumi.dexter.MultiplePermissionsReport;
 import com.karumi.dexter.PermissionToken;
@@ -44,6 +53,12 @@ import com.karumi.dexter.listener.multi.MultiplePermissionsListener;
 
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
+import android.widget.AutoCompleteTextView;
+
+import androidx.appcompat.widget.SearchView;
+
 
 import java.io.Serializable;
 import java.text.ParseException;
@@ -72,6 +87,7 @@ public class MainActivity extends AppCompatActivity {
 
         binding = ActivityMainBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
+
 
         auth = FirebaseAuth.getInstance();
 
@@ -163,6 +179,10 @@ public class MainActivity extends AppCompatActivity {
                 alarmManager.setExact(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(), pendingIntent);
             }
         }
+
+
+
+
     }
 
     @Override
@@ -175,4 +195,47 @@ public class MainActivity extends AppCompatActivity {
             alarmManager.cancel(pendingIntent);
         }
     }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.search, menu);
+
+        MenuItem menuItem = menu.findItem(R.id.search_menu);
+        SearchView searchView = (SearchView) menuItem.getActionView();
+        searchView.setQueryHint("Enter Category");
+
+        searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener() {
+            @Override
+            public boolean onQueryTextSubmit(String query) {
+                process_search(query);
+                return false;
+            }
+
+            @Override
+            public boolean onQueryTextChange(String newText) {
+                process_search(newText);
+                return false;
+            }
+        });
+
+
+        return super.onCreateOptionsMenu(menu);
+    }
+
+
+
+
+    private void process_search(String query) {
+
+        FirebaseRecyclerOptions<TaskModel> options = new FirebaseRecyclerOptions.Builder<TaskModel>().setQuery(FirebaseDatabase.getInstance().
+                getReference("Tasks").child(auth.getCurrentUser().getUid()).orderByChild("category").startAt(query).endAt(query+"\uf8ff"), TaskModel.class).build();
+        adapter = new TaskAdapter(options);
+        adapter.startListening();
+        binding.showTaskRec.setAdapter(adapter);
+
+    }
+
+
+
 }

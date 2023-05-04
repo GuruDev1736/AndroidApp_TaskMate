@@ -1,7 +1,11 @@
 package com.example.taskmate.Adapter;
 
+import static com.example.taskmate.Activities.Constants.SuccessToast;
+
 import android.app.Dialog;
+import android.app.ProgressDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -15,6 +19,7 @@ import androidx.annotation.NonNull;
 import androidx.fragment.app.FragmentManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import com.example.taskmate.Activities.Constants;
 import com.example.taskmate.Activities.EditTaskActivity;
 import com.example.taskmate.Activities.MainActivity;
 import com.example.taskmate.Model.TaskModel;
@@ -25,6 +30,7 @@ import com.google.android.material.datepicker.CalendarConstraints;
 import com.google.android.material.datepicker.DateValidatorPointForward;
 import com.google.android.material.datepicker.MaterialDatePicker;
 import com.google.android.material.datepicker.MaterialPickerOnPositiveButtonClickListener;
+import com.google.android.material.dialog.MaterialAlertDialogBuilder;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.FirebaseDatabase;
 
@@ -46,30 +52,54 @@ public class TaskAdapter extends FirebaseRecyclerAdapter<TaskModel,TaskAdapter.o
     @Override
     protected void onBindViewHolder(@NonNull onviewholder holder, int position, @NonNull TaskModel model) {
 
-        holder.title.setText(model.getTitle());
-        holder.date.setText(model.getDate());
-        holder.description.setText(model.getDescription());
-        holder.time.setText(model.getTime());
+//        if (model!=null)
+//        {
+            holder.title.setText(model.getTitle());
+            holder.date.setText(model.getDate());
+            holder.description.setText(model.getDescription());
+            holder.time.setText(model.getTime());
+            holder.category.setText(model.getCategory());
 
+        ProgressDialog pd = Constants.progressDialog(holder.itemView.getContext(),"Deleting Task","Please Wait...");
 
-        holder.delete.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
+            holder.delete.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
 
-                FirebaseDatabase.getInstance().getReference("Tasks").child(FirebaseAuth.getInstance().getCurrentUser().getUid())
-                        .child(model.getKey()).removeValue();
+                    pd.show();
 
-            }
-        });
+                    MaterialAlertDialogBuilder alertDialog = new MaterialAlertDialogBuilder(holder.itemView.getContext() , R.style.AlertDialogTheme);
+                    alertDialog.setTitle("Delete Task");
+                    alertDialog.setMessage("Are You Sure ?");
+                    alertDialog.setIcon(R.drawable.taskmate);
+                    alertDialog.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialogInterface, int i) {
+                            FirebaseDatabase.getInstance().getReference("Tasks").child(FirebaseAuth.getInstance().getCurrentUser().getUid())
+                                    .child(model.getKey()).removeValue();
+                            SuccessToast(holder.itemView.getContext(),"Task Successfully Deleted ");
+                            pd.dismiss();
+                        }
+                    }).setNegativeButton("No", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialogInterface, int i) {
+                            dialogInterface.dismiss();
+                            pd.dismiss();
+                        }
+                    });
+                    alertDialog.show();
 
-        holder.edit.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                holder.itemView.getContext().startActivity(new Intent(view.getContext(), EditTaskActivity.class).putExtra("key",model.getKey()));
-            }
-        });
+                }
+            });
 
+            holder.edit.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    holder.itemView.getContext().startActivity(new Intent(view.getContext(), EditTaskActivity.class).putExtra("key",model.getKey()));
+                }
+            });
 
+//        }
 
     }
 
@@ -85,7 +115,7 @@ public class TaskAdapter extends FirebaseRecyclerAdapter<TaskModel,TaskAdapter.o
 
     public class onviewholder extends RecyclerView.ViewHolder {
 
-        TextView title , description , date ,time ;
+        TextView title , description , date ,time , category ;
         Button edit , delete ;
 
         public onviewholder(@NonNull View itemView) {
@@ -97,6 +127,7 @@ public class TaskAdapter extends FirebaseRecyclerAdapter<TaskModel,TaskAdapter.o
             time = itemView.findViewById(R.id.time);
             edit = itemView.findViewById(R.id.edit);
             delete = itemView.findViewById(R.id.delete);
+            category = itemView.findViewById(R.id.category);
 
         }
     }

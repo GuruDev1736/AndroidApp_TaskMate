@@ -11,6 +11,8 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.view.View;
+import android.widget.AdapterView;
+import android.widget.ArrayAdapter;
 
 import com.example.taskmate.Model.TaskModel;
 import com.example.taskmate.R;
@@ -33,7 +35,7 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 
-public class EditTaskActivity extends AppCompatActivity {
+public class EditTaskActivity extends AppCompatActivity implements AdapterView.OnItemSelectedListener {
 
     com.example.taskmate.databinding.ActivityEditTaskBinding binding ;
     private SimpleDateFormat timeFormatter = new SimpleDateFormat("hh:mm a");
@@ -54,6 +56,11 @@ public class EditTaskActivity extends AppCompatActivity {
 
         ProgressDialog progressDialog = Constants.progressDialog(this,"Loading Data","Please Wait...");
         progressDialog.show();
+
+        ArrayAdapter<CharSequence> sub = ArrayAdapter.createFromResource(binding.getRoot().getContext(), R.array.Category, android.R.layout.simple_spinner_item);
+        sub.setDropDownViewResource(androidx.transition.R.layout.support_simple_spinner_dropdown_item);
+        binding.category.setAdapter(sub);
+
 
 
         binding.date.setOnClickListener(new View.OnClickListener() {
@@ -153,6 +160,7 @@ public class EditTaskActivity extends AppCompatActivity {
                     String description  = binding.etDescription.getText().toString();
                     String date  = binding.etDate.getText().toString();
                     String time  = binding.etTime.getText().toString();
+                    String category = binding.category.getSelectedItem().toString();
 
                     if (TextUtils.isEmpty(title))
                     {
@@ -175,10 +183,15 @@ public class EditTaskActivity extends AppCompatActivity {
                         binding.etTime.setError("Time Required");
                         return;
                     }
+                    if (category.equals("Select Your Category"))
+                    {
+                        ErrorToast(getApplicationContext(),"Please Select the Category");
+                        return;
+                    }
 
                     pd.show();
 
-                    TaskModel model = new TaskModel(title,description,date,time,key);
+                    TaskModel model = new TaskModel(title,description,date,time,key ,category);
                     reference.child(auth.getCurrentUser().getUid()).child(key).setValue(model)
                             .addOnSuccessListener(new OnSuccessListener<Void>() {
                                 @Override
@@ -203,5 +216,15 @@ public class EditTaskActivity extends AppCompatActivity {
     @Override
     public void onBackPressed() {
         super.onBackPressed();
+    }
+
+    @Override
+    public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
+
+    }
+
+    @Override
+    public void onNothingSelected(AdapterView<?> adapterView) {
+
     }
 }
