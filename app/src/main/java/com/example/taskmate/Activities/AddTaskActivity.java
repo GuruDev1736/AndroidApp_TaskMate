@@ -14,6 +14,7 @@ import android.text.TextUtils;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
+import android.widget.Toast;
 
 import com.example.taskmate.Adapter.TaskAdapter;
 import com.example.taskmate.Model.TaskModel;
@@ -127,6 +128,8 @@ public class AddTaskActivity extends AppCompatActivity implements AdapterView.On
         sub.setDropDownViewResource(androidx.transition.R.layout.support_simple_spinner_dropdown_item);
         binding.category.setAdapter(sub);
 
+
+
         binding.submit.setOnClickListener(new View.OnClickListener() {
 
             @Override
@@ -202,6 +205,7 @@ public class AddTaskActivity extends AppCompatActivity implements AdapterView.On
 
     @Override
     public void onItemSelected(AdapterView<?> adapterView, View view, int i, long l) {
+
 
     }
 

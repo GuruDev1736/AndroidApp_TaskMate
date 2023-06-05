@@ -139,6 +139,63 @@ public class EditTaskActivity extends AppCompatActivity implements AdapterView.O
                     binding.etDescription.setText(model.getDescription());
                     binding.etTime.setText(model.getTime());
                     binding.etDate.setText(model.getDate());
+
+                    if (model.getCategory().equals("Work"))
+                    {
+                        binding.category.setSelection(1);
+                        return;
+                    }
+                    if (model.getCategory().equals("Personal"))
+                    {
+                        binding.category.setSelection(2);
+                        return;
+                    }
+                    if (model.getCategory().equals("Shopping"))
+                    {
+                        binding.category.setSelection(3);
+                        return;
+                    }
+                    if (model.getCategory().equals("Education"))
+                    {
+                        binding.category.setSelection(4);
+                        return;
+                    }
+                    if (model.getCategory().equals("Finance"))
+                    {
+                        binding.category.setSelection(5);
+                        return;
+                    }
+                    if (model.getCategory().equals("Health"))
+                    {
+                        binding.category.setSelection(6);
+                        return;
+                    }
+                    if (model.getCategory().equals("Home"))
+                    {
+                        binding.category.setSelection(7);
+                        return;
+                    }
+                    if (model.getCategory().equals("Leisure"))
+                    {
+                        binding.category.setSelection(8);
+                        return;
+                    }
+                    if (model.getCategory().equals("Social"))
+                    {
+                        binding.category.setSelection(9);
+                        return;
+                    }
+                    if (model.getCategory().equals("Travel"))
+                    {
+                        binding.category.setSelection(10);
+                        return;
+                    }
+                    if (model.getCategory().equals("Other"))
+                    {
+                        binding.category.setSelection(11);
+                        return;
+                    }
+
                 }
 
             }

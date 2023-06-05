@@ -50,6 +50,7 @@ import com.karumi.dexter.MultiplePermissionsReport;
 import com.karumi.dexter.PermissionToken;
 import com.karumi.dexter.listener.PermissionRequest;
 import com.karumi.dexter.listener.multi.MultiplePermissionsListener;
+import com.mailgun.client.MailgunClient;
 
 import android.view.Menu;
 import android.view.MenuItem;
@@ -66,8 +67,10 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 
 
 public class MainActivity extends AppCompatActivity {
@@ -78,6 +81,8 @@ public class MainActivity extends AppCompatActivity {
     FirebaseAuth auth ;
 
     int requestCode = (int) System.currentTimeMillis();
+
+
 
 
     @SuppressLint("NotifyDataSetChanged")
@@ -179,10 +184,6 @@ public class MainActivity extends AppCompatActivity {
                 alarmManager.setExact(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis(), pendingIntent);
             }
         }
-
-
-
-
     }
 
     @Override
@@ -235,6 +236,7 @@ public class MainActivity extends AppCompatActivity {
         binding.showTaskRec.setAdapter(adapter);
 
     }
+
 
 
 

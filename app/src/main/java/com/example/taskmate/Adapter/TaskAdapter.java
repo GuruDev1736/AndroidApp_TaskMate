@@ -16,12 +16,14 @@ import android.widget.ImageButton;
 import android.widget.TextView;
 
 import androidx.annotation.NonNull;
+import androidx.cardview.widget.CardView;
 import androidx.fragment.app.FragmentManager;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.taskmate.Activities.Constants;
 import com.example.taskmate.Activities.EditTaskActivity;
 import com.example.taskmate.Activities.MainActivity;
+import com.example.taskmate.Activities.Notes_Attachment;
 import com.example.taskmate.Model.TaskModel;
 import com.example.taskmate.R;
 import com.firebase.ui.database.FirebaseRecyclerAdapter;
@@ -60,13 +62,12 @@ public class TaskAdapter extends FirebaseRecyclerAdapter<TaskModel,TaskAdapter.o
             holder.time.setText(model.getTime());
             holder.category.setText(model.getCategory());
 
-        ProgressDialog pd = Constants.progressDialog(holder.itemView.getContext(),"Deleting Task","Please Wait...");
 
             holder.delete.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
 
-                    pd.show();
+
 
                     MaterialAlertDialogBuilder alertDialog = new MaterialAlertDialogBuilder(holder.itemView.getContext() , R.style.AlertDialogTheme);
                     alertDialog.setTitle("Delete Task");
@@ -78,13 +79,13 @@ public class TaskAdapter extends FirebaseRecyclerAdapter<TaskModel,TaskAdapter.o
                             FirebaseDatabase.getInstance().getReference("Tasks").child(FirebaseAuth.getInstance().getCurrentUser().getUid())
                                     .child(model.getKey()).removeValue();
                             SuccessToast(holder.itemView.getContext(),"Task Successfully Deleted ");
-                            pd.dismiss();
+
                         }
                     }).setNegativeButton("No", new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialogInterface, int i) {
                             dialogInterface.dismiss();
-                            pd.dismiss();
+
                         }
                     });
                     alertDialog.show();
@@ -96,6 +97,13 @@ public class TaskAdapter extends FirebaseRecyclerAdapter<TaskModel,TaskAdapter.o
                 @Override
                 public void onClick(View view) {
                     holder.itemView.getContext().startActivity(new Intent(view.getContext(), EditTaskActivity.class).putExtra("key",model.getKey()));
+                }
+            });
+
+            holder.cardView.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    holder.itemView.getContext().startActivity(new Intent(view.getContext(), Notes_Attachment.class).putExtra("key",model.getKey()));
                 }
             });
 
@@ -117,6 +125,7 @@ public class TaskAdapter extends FirebaseRecyclerAdapter<TaskModel,TaskAdapter.o
 
         TextView title , description , date ,time , category ;
         Button edit , delete ;
+        CardView cardView ;
 
         public onviewholder(@NonNull View itemView) {
             super(itemView);
@@ -128,6 +137,7 @@ public class TaskAdapter extends FirebaseRecyclerAdapter<TaskModel,TaskAdapter.o
             edit = itemView.findViewById(R.id.edit);
             delete = itemView.findViewById(R.id.delete);
             category = itemView.findViewById(R.id.category);
+            cardView = itemView.findViewById(R.id.cardview);
 
         }
     }

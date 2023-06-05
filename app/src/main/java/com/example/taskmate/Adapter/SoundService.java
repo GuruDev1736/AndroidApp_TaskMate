@@ -18,6 +18,8 @@ public class SoundService extends Service {
         super.onCreate();
         mediaPlayer = MediaPlayer.create(this, R.raw.notification_sound);
         mediaPlayer.setLooping(true);
+
+
     }
 
     @Override

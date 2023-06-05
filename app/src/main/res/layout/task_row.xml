@@ -35,7 +35,7 @@
             android:layout_alignParentTop="true"
             android:layout_marginStart="10dp"
             android:layout_marginTop="5dp"
-            android:layout_toEndOf="@id/img1"
+            android:layout_toEndOf="@id/title_hint"
             android:gravity="left"
             android:text="Title"
             android:textColor="@color/black"
@@ -43,15 +43,41 @@
             android:textStyle="bold" />
 
         <TextView
+            android:id="@+id/title_hint"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_alignParentTop="true"
+            android:layout_marginStart="10dp"
+            android:layout_marginTop="5dp"
+            android:layout_toEndOf="@id/img1"
+            android:gravity="left"
+            android:text="Title  : "
+            android:textColor="@color/black"
+            android:textSize="15sp" />
+
+        <TextView
             android:id="@+id/description"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_below="@+id/title"
-            android:layout_alignStart="@+id/title"
             android:layout_alignEnd="@+id/title"
+            android:layout_marginStart="10dp"
             android:layout_marginEnd="0dp"
+            android:layout_toEndOf="@+id/description_hint"
             android:gravity="left"
+            android:textStyle="bold"
             android:text="Description"
+            android:textColor="@color/black" />
+
+        <TextView
+            android:id="@+id/description_hint"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/title_hint"
+            android:layout_alignStart="@+id/title_hint"
+            android:layout_alignEnd="@+id/title_hint"
+            android:gravity="left"
+            android:text="Des   :"
             android:textColor="@color/black" />
 
         <TextView
@@ -59,11 +85,24 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_below="@+id/description"
-            android:layout_alignStart="@+id/title"
             android:layout_alignEnd="@+id/title"
+            android:layout_marginStart="10dp"
             android:layout_marginEnd="0dp"
+            android:layout_toEndOf="@+id/date_hint"
             android:gravity="left"
             android:text="Date"
+            android:textStyle="bold"
+            android:textColor="@color/black" />
+
+        <TextView
+            android:id="@+id/date_hint"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/description_hint"
+            android:layout_alignStart="@+id/description_hint"
+            android:layout_alignEnd="@+id/description_hint"
+            android:gravity="left"
+            android:text="Date  : "
             android:textColor="@color/black" />
 
         <TextView
@@ -71,11 +110,24 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_below="@+id/date"
-            android:layout_alignStart="@+id/title"
             android:layout_alignEnd="@+id/title"
+            android:layout_marginStart="10dp"
             android:layout_marginEnd="0dp"
+            android:layout_toEndOf="@+id/time_hint"
             android:gravity="left"
             android:text="Time"
+            android:textStyle="bold"
+            android:textColor="@color/black" />
+
+        <TextView
+            android:id="@+id/time_hint"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/date_hint"
+            android:layout_alignStart="@+id/date_hint"
+            android:layout_alignEnd="@+id/date_hint"
+            android:gravity="left"
+            android:text="Time : "
             android:textColor="@color/black" />
 
   <TextView
@@ -88,6 +140,19 @@
             android:layout_marginEnd="0dp"
             android:gravity="left"
             android:text="Category"
+            android:textStyle="bold"
+            android:textColor="@color/black" />
+
+        <TextView
+            android:id="@+id/category_hint"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_below="@+id/time_hint"
+            android:layout_alignStart="@+id/time_hint"
+            android:layout_alignEnd="@+id/time_hint"
+            android:layout_marginEnd="0dp"
+            android:gravity="left"
+            android:text="Cate  : "
             android:textColor="@color/black" />
 
         <com.google.android.material.button.MaterialButton
