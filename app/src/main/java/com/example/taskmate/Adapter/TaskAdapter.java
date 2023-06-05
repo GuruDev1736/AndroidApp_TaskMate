@@ -76,10 +76,17 @@ public class TaskAdapter extends FirebaseRecyclerAdapter<TaskModel,TaskAdapter.o
                     alertDialog.setPositiveButton("Yes", new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialogInterface, int i) {
-                            FirebaseDatabase.getInstance().getReference("Tasks").child(FirebaseAuth.getInstance().getCurrentUser().getUid())
-                                    .child(model.getKey()).removeValue();
-                            SuccessToast(holder.itemView.getContext(),"Task Successfully Deleted ");
-
+                            String taskkey= model.getKey();
+                            if (taskkey!=null)
+                            {
+                                FirebaseDatabase.getInstance().getReference("Tasks").child(FirebaseAuth.getInstance().getCurrentUser().getUid())
+                                        .child(model.getKey()).removeValue();
+                                SuccessToast(holder.itemView.getContext(),"Task Successfully Deleted ");
+                            }
+                            else
+                            {
+                                Constants.ErrorToast(holder.itemView.getContext(),"Key is Null");
+                            }
                         }
                     }).setNegativeButton("No", new DialogInterface.OnClickListener() {
                         @Override

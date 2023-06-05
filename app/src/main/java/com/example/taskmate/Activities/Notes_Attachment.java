@@ -12,6 +12,7 @@ import android.os.Bundle;
 import android.provider.MediaStore;
 import android.text.TextUtils;
 import android.view.View;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
@@ -34,6 +35,8 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.ListResult;
+import com.google.firebase.storage.StorageMetadata;
 import com.google.firebase.storage.StorageReference;
 import com.google.firebase.storage.UploadTask;
 import com.karumi.dexter.Dexter;
@@ -69,11 +72,15 @@ public class Notes_Attachment extends AppCompatActivity {
         binding  = ActivityNotesAttachmentBinding.inflate(getLayoutInflater());
         setContentView(binding.getRoot());
 
+
+
+
         database = FirebaseDatabase.getInstance();
         reference = database.getReference("Tasks");
         auth = FirebaseAuth.getInstance();
         Intent intent = getIntent();
         String key = intent.getStringExtra("key");
+
 
         ProgressDialog progressDialog = Constants.progressDialog(this,"Saving","Please Wait....");
 
@@ -83,7 +90,7 @@ public class Notes_Attachment extends AppCompatActivity {
         attachmentdailog.show();
         binding.attachmentRec.setLayoutManager(new LinearLayoutManager(Notes_Attachment.this));
         FirebaseRecyclerOptions<TaskModel> options = new FirebaseRecyclerOptions.Builder<TaskModel>().setQuery(FirebaseDatabase.getInstance().
-                getReference("Tasks").child(auth.getCurrentUser().getUid()).child("Attachments"), TaskModel.class).build();
+                getReference("Tasks").child(auth.getCurrentUser().getUid()).child(key).child("Attachments"), TaskModel.class).build();
         adapter = new AttachmentAdapter(options)
         {
             @Override
@@ -187,7 +194,7 @@ public class Notes_Attachment extends AppCompatActivity {
             @Override
             public void onPermissionGranted(PermissionGrantedResponse permissionGrantedResponse) {
              Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
-             intent.setType("*/*");
+             intent.setType("application/pdf");
              startActivityForResult(intent,102);
             }
 
@@ -361,7 +368,7 @@ public class Notes_Attachment extends AppCompatActivity {
                         HashMap<String,Object> hashMap = new HashMap<>();
                         hashMap.put("Attachment_URL",uri.toString());
                         hashMap.put("Attachment_name",filename);
-                        database.getReference("Tasks").child(auth.getCurrentUser().getUid()).child("Attachments").child(reference.push().getKey()).updateChildren(hashMap)
+                        database.getReference("Tasks").child(auth.getCurrentUser().getUid()).child(key).child("Attachments").child(reference.push().getKey()).updateChildren(hashMap)
                                         .addOnSuccessListener(new OnSuccessListener<Void>() {
                                             @Override
                                             public void onSuccess(Void unused) {
@@ -403,29 +410,43 @@ public class Notes_Attachment extends AppCompatActivity {
     {
         ProgressDialog progressDialog = Constants.progressDialog(this , "Fetching Data" , "Please Wait....");
         progressDialog.show();
-        reference.child(id).child(key).addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot snapshot) {
 
-                TaskModel model = snapshot.getValue(TaskModel.class);
+        if (id!=null  && key!=null )
+        {
+            reference.child(id).child(key).addValueEventListener(new ValueEventListener() {
+                @Override
+                public void onDataChange(@NonNull DataSnapshot snapshot) {
 
-                if (model!=null)
-                {
-                     binding.etNotes.setText(model.getNote());
-                     Glide.with(Notes_Attachment.this).load(model.getImage_URL()).diskCacheStrategy(DiskCacheStrategy.ALL).placeholder(R.drawable.placeholder)
-                             .transition(DrawableTransitionOptions.withCrossFade()).into(binding.image);
+                    TaskModel model = snapshot.getValue(TaskModel.class);
+
+                    if (model!=null)
+                    {
+                        binding.etNotes.setText(model.getNote());
+                        if (!isDestroyed())
+                        {
+                            Glide.with(Notes_Attachment.this).load(model.getImage_URL()).diskCacheStrategy(DiskCacheStrategy.ALL).placeholder(R.drawable.placeholder)
+                                    .transition(DrawableTransitionOptions.withCrossFade()).into(binding.image);
+                        }
+
+
+                    }
+                    progressDialog.dismiss();
 
                 }
-                progressDialog.dismiss();
 
-            }
+                @Override
+                public void onCancelled(@NonNull DatabaseError error) {
+                    Constants.ErrorToast(getApplicationContext(),"Error : "+error.getMessage());
+                    progressDialog.dismiss();
+                }
+            });
+        }
+        else
+        {
+            progressDialog.dismiss();
+            Constants.ErrorToast(Notes_Attachment.this,"Invalid key and Id");
+        }
 
-            @Override
-            public void onCancelled(@NonNull DatabaseError error) {
-                Constants.ErrorToast(getApplicationContext(),"Error : "+error.getMessage());
-                progressDialog.dismiss();
-            }
-        });
 
 
     }

@@ -138,6 +138,11 @@ public class MainActivity extends AppCompatActivity {
 
     public void setReminder(Context context , String title, String description , String date, String time) {
         // Parse date and time strings to obtain a calendar object
+        if (date == null || time == null) {
+            return; // Exit the method without setting the reminder
+        }
+
+
         Calendar calendar = Calendar.getInstance();
 
         SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy", Locale.getDefault());
@@ -173,6 +178,7 @@ public class MainActivity extends AppCompatActivity {
         intent.putExtra("description", description);
 
         // Create a new pending intent to be triggered by the alarm
+        int requestCode = 0;
         PendingIntent pendingIntent = PendingIntent.getBroadcast(context, requestCode, intent, PendingIntent.FLAG_UPDATE_CURRENT);
 
         // Get an instance of the AlarmManager class and set the alarm
