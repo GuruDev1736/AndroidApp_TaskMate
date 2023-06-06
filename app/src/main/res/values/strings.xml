@@ -22,4 +22,5 @@
         <item>Travel</item>
         <item>Other</item>
     </string-array>
+    <string name="title_activity_location_based_task">LocationBasedTask</string>
 </resources>

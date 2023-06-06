@@ -18,6 +18,17 @@
         android:layout_marginBottom="20dp"
         app:srcCompat="@android:drawable/ic_input_add" />
 
+    <com.google.android.material.floatingactionbutton.FloatingActionButton
+        android:id="@+id/location_fab"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_above="@+id/fab"
+        android:layout_alignParentEnd="true"
+        android:layout_marginEnd="20dp"
+        android:layout_marginBottom="20dp"
+        android:backgroundTint="@color/main"
+        app:srcCompat="@drawable/outline_location_on_24" />
+
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/show_task_rec"
         android:layout_width="match_parent"

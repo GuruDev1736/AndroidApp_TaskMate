@@ -2,27 +2,21 @@ package com.example.taskmate.Adapter;
 
 import android.content.ActivityNotFoundException;
 import android.content.Intent;
-import android.content.pm.PackageManager;
-import android.content.pm.ResolveInfo;
 import android.net.Uri;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.cardview.widget.CardView;
 import androidx.recyclerview.widget.RecyclerView;
 
 import com.example.taskmate.Activities.Constants;
-import com.example.taskmate.Activities.DisplayDocument;
 import com.example.taskmate.Model.TaskModel;
 import com.example.taskmate.R;
 import com.firebase.ui.database.FirebaseRecyclerAdapter;
 import com.firebase.ui.database.FirebaseRecyclerOptions;
-
-import java.util.List;
 
 public class AttachmentAdapter extends FirebaseRecyclerAdapter<TaskModel,AttachmentAdapter.onviewholder> {
 
