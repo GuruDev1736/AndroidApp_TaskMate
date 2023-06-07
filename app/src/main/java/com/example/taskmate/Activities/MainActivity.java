@@ -10,20 +10,25 @@ import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.ProgressDialog;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
+import android.location.LocationManager;
 import android.os.Build;
 import android.os.Bundle;
 
 import com.example.taskmate.Adapter.ReminderBroadcast;
 import com.example.taskmate.Adapter.TaskAdapter;
+import com.example.taskmate.Location.LocationBasedTask;
 import com.example.taskmate.Model.TaskModel;
 import com.example.taskmate.R;
 import com.firebase.ui.database.FirebaseRecyclerOptions;
 import com.google.android.material.snackbar.Snackbar;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.provider.Settings;
 import android.text.Editable;
 import android.text.TextWatcher;
 import android.view.MenuInflater;
@@ -133,6 +138,48 @@ public class MainActivity extends AppCompatActivity {
         adapter.startListening();
         binding.showTaskRec.setAdapter(adapter);
 
+        binding.locationFab.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+
+                Dexter.withContext(MainActivity.this).withPermissions(Manifest.permission.ACCESS_FINE_LOCATION,Manifest.permission.ACCESS_COARSE_LOCATION)
+                                .withListener(new MultiplePermissionsListener() {
+                                    @Override
+                                    public void onPermissionsChecked(MultiplePermissionsReport multiplePermissionsReport) {
+                                        // Check if GPS is enabled
+                                        LocationManager locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
+                                        boolean isGPSEnabled = locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER);
+
+                                        // If GPS is not enabled, show a dialog to prompt the user to enable it
+                                        if (!isGPSEnabled) {
+                                            AlertDialog.Builder builder = new AlertDialog.Builder(MainActivity.this);
+                                            builder.setTitle("Location is not enabled");
+                                            builder.setMessage("Please enable location to use Location Based Task Service");
+                                            builder.setPositiveButton("OK", new DialogInterface.OnClickListener() {
+                                                @Override
+                                                public void onClick(DialogInterface dialog, int which) {
+                                                    // Open the device settings to enable GPS
+                                                    Intent intent = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
+                                                    startActivity(intent);
+                                                }
+                                            });
+                                            builder.setNegativeButton("Cancel", null);
+                                            builder.show();
+                                        } else {
+                                            startActivity(new Intent(getApplicationContext(), LocationBasedTask.class));
+                                        }
+
+                                    }
+
+                                    @Override
+                                    public void onPermissionRationaleShouldBeShown(List<PermissionRequest> list, PermissionToken permissionToken) {
+                                        permissionToken.continuePermissionRequest();
+                                    }
+                                }).check();
+
+            }
+        });
+
 
     }
 
@@ -179,7 +226,7 @@ public class MainActivity extends AppCompatActivity {
 
         // Create a new pending intent to be triggered by the alarm
         int requestCode = 0;
-        PendingIntent pendingIntent = PendingIntent.getBroadcast(context, requestCode, intent, PendingIntent.FLAG_UPDATE_CURRENT);
+        PendingIntent pendingIntent = PendingIntent.getBroadcast(context, requestCode, intent, PendingIntent.FLAG_IMMUTABLE);
 
         // Get an instance of the AlarmManager class and set the alarm
         AlarmManager alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);

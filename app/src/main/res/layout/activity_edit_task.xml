@@ -57,7 +57,7 @@
 
         <com.google.android.material.textfield.TextInputLayout
             android:id="@+id/task_time"
-            android:layout_width="300dp"
+            android:layout_width="200dp"
             android:layout_height="wrap_content"
             android:layout_alignParentStart="true">
 
@@ -80,7 +80,7 @@
             android:layout_height="wrap_content"
             android:layout_alignTop="@+id/task_time"
             android:layout_alignBottom="@+id/task_time"
-            android:layout_marginStart="20dp"
+            android:layout_marginStart="5dp"
             android:layout_marginTop="5dp"
             android:layout_marginBottom="5dp"
             android:layout_toEndOf="@+id/task_time"
@@ -103,7 +103,7 @@
 
         <com.google.android.material.textfield.TextInputLayout
             android:id="@+id/task_date"
-            android:layout_width="300dp"
+            android:layout_width="200dp"
             android:layout_height="wrap_content"
             android:layout_alignParentStart="true">
 
@@ -128,7 +128,7 @@
             android:layout_height="wrap_content"
             android:layout_alignTop="@+id/task_date"
             android:layout_alignBottom="@+id/task_date"
-            android:layout_marginStart="20dp"
+            android:layout_marginStart="5dp"
             android:layout_marginTop="5dp"
             android:layout_marginBottom="5dp"
             android:layout_toEndOf="@+id/task_date"

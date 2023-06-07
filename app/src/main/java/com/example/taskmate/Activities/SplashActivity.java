@@ -24,6 +24,7 @@ public class SplashActivity extends AppCompatActivity {
 
     private ActivitySplashBinding binding ;
 
+    @RequiresApi(api = Build.VERSION_CODES.TIRAMISU)
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -32,26 +33,26 @@ public class SplashActivity extends AppCompatActivity {
 
         Dexter.withContext(SplashActivity.this).withPermissions(Manifest.permission.POST_NOTIFICATIONS, Manifest.permission.SCHEDULE_EXACT_ALARM,Manifest.permission.SET_ALARM
         ,Manifest.permission.VIBRATE,Manifest.permission.WAKE_LOCK,Manifest.permission.RECEIVE_BOOT_COMPLETED,Manifest.permission.FOREGROUND_SERVICE,Manifest.permission.CAMERA,Manifest.permission.WRITE_EXTERNAL_STORAGE
-                ,Manifest.permission.READ_EXTERNAL_STORAGE)
+                ,Manifest.permission.READ_EXTERNAL_STORAGE,Manifest.permission.ACCESS_FINE_LOCATION,Manifest.permission.ACCESS_COARSE_LOCATION)
                 .withListener(new MultiplePermissionsListener() {
                     @Override
                     public void onPermissionsChecked(MultiplePermissionsReport multiplePermissionsReport) {
-
+                        new Handler().postDelayed(new Runnable() {
+                            @Override
+                            public void run() {
+                                startActivity(new Intent(SplashActivity.this, LoginActivity.class));
+                                finish();
+                            }
+                        },2000);
                     }
 
                     @Override
                     public void onPermissionRationaleShouldBeShown(List<PermissionRequest> list, PermissionToken permissionToken) {
                         permissionToken.continuePermissionRequest();
                     }
-                });
+                }).check();
 
-        new Handler().postDelayed(new Runnable() {
-            @Override
-            public void run() {
-                startActivity(new Intent(SplashActivity.this, LoginActivity.class));
-                finish();
-            }
-        },2000);
+
 
     }
 }
