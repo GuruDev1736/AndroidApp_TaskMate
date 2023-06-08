@@ -2,7 +2,10 @@ package com.example.taskmate.Location;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.annotation.RequiresApi;
 import androidx.core.app.ActivityCompat;
+import androidx.core.app.NotificationCompat;
+import androidx.core.app.NotificationManagerCompat;
 import androidx.core.content.ContextCompat;
 import androidx.core.graphics.PaintKt;
 import androidx.fragment.app.FragmentActivity;
@@ -10,6 +13,7 @@ import androidx.fragment.app.FragmentActivity;
 import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.AlertDialog;
+import android.app.NotificationManager;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.pm.PackageManager;
@@ -66,15 +70,21 @@ public class LocationBasedTask extends FragmentActivity implements
     private LocationRequest locationRequest;
     private Location lastlocation;
     private Marker currentuserlocationmarker;
-    private static final int Request_user_location_code = 99 ;
+    private static final int Request_user_location_code = 99;
     private LocationCallback locationCallback;
+
+    private static final String NOTIFICATION_CHANNEL_ID = "TaskNotificationChannel";
+    private static final int NOTIFICATION_ID = 1;
+    private NotificationManager notificationManager;
+    private Address userAddress;
+    private Double Targetlat, Targetlng;
+    private String TargetName;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        if (Build.VERSION.SDK_INT>=Build.VERSION_CODES.M)
-        {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             checkuserlocationpermission();
         }
 
@@ -100,11 +110,10 @@ public class LocationBasedTask extends FragmentActivity implements
     }
 
 
-    public void onClick(View view)
-    {
+    public void onClick(View view) {
         if (view.getId() == R.id.searchaddress) {
             AutoCompleteTextView addressfield = findViewById(R.id.location_search);
-            addressfield.setAdapter(new PlaceAutoSuggestAdapter(LocationBasedTask.this,android.R.layout.simple_list_item_1));
+            addressfield.setAdapter(new PlaceAutoSuggestAdapter(LocationBasedTask.this, android.R.layout.simple_list_item_1));
             String address = addressfield.getText().toString();
 
             List<Address> addressList = null;
@@ -119,13 +128,34 @@ public class LocationBasedTask extends FragmentActivity implements
                         for (int i = 0; i < addressList.size(); i++) {
                             Address useraddress = addressList.get(i);
                             LatLng latLng = new LatLng(useraddress.getLatitude(), useraddress.getLongitude());
+                            Targetlat = useraddress.getLatitude();
+                            Targetlng = useraddress.getLongitude();
                             markerOptions
                                     .position(latLng)
                                     .title(address)
                                     .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_RED));
+                            TargetName = address;
                             mMap.addMarker(markerOptions);
                             mMap.moveCamera(CameraUpdateFactory.newLatLng(latLng));
                             mMap.animateCamera(CameraUpdateFactory.zoomTo(10));
+                            mMap.setOnMarkerClickListener(new GoogleMap.OnMarkerClickListener() {
+                                @Override
+                                public boolean onMarkerClick(@NonNull Marker marker) {
+                                    AlertDialog.Builder builder = new AlertDialog.Builder(LocationBasedTask.this);
+                                    builder.setTitle("Add to Task")
+                                            .setMessage("Do you want to add this location to your task?")
+                                            .setPositiveButton("Add", new DialogInterface.OnClickListener() {
+                                                @Override
+                                                public void onClick(DialogInterface dialog, int which) {
+
+                                                    userAddress = useraddress;
+                                                }
+                                            })
+                                            .setNegativeButton("Cancel", null)
+                                            .show();
+                                    return false;
+                                }
+                            });
                         }
                     }
 
@@ -139,11 +169,10 @@ public class LocationBasedTask extends FragmentActivity implements
     }
 
 
-
     @Override
     public void onMapReady(GoogleMap googleMap) {
         mMap = googleMap;
-        if (ContextCompat.checkSelfPermission(this,Manifest.permission.ACCESS_FINE_LOCATION)==PackageManager.PERMISSION_GRANTED){
+        if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
             mMap.setMyLocationEnabled(true);
             buildGoogleApiClient();
             return;
@@ -152,23 +181,16 @@ public class LocationBasedTask extends FragmentActivity implements
 
     }
 
-    public boolean checkuserlocationpermission()
-    {
-        if (ContextCompat.checkSelfPermission(LocationBasedTask.this,Manifest.permission.ACCESS_FINE_LOCATION)!=PackageManager.PERMISSION_GRANTED)
-        {
-            if (ActivityCompat.shouldShowRequestPermissionRationale(this,Manifest.permission.ACCESS_FINE_LOCATION))
-            {
-                ActivityCompat.requestPermissions(this , new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, Request_user_location_code);
-            }
-            else
-            {
-                ActivityCompat.requestPermissions(this , new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, Request_user_location_code);
+    public boolean checkuserlocationpermission() {
+        if (ContextCompat.checkSelfPermission(LocationBasedTask.this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+            if (ActivityCompat.shouldShowRequestPermissionRationale(this, Manifest.permission.ACCESS_FINE_LOCATION)) {
+                ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, Request_user_location_code);
+            } else {
+                ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, Request_user_location_code);
             }
             return false;
-        }
-        else
-        {
-           return true;
+        } else {
+            return true;
         }
     }
 
@@ -183,24 +205,21 @@ public class LocationBasedTask extends FragmentActivity implements
                             buildGoogleApiClient();
                         }
                     }
-                }
-                else
-                {
-                    Constants.ErrorToast(this , "Permission Denied" );
+                } else {
+                    Constants.ErrorToast(this, "Permission Denied");
                 }
                 return;
         }
     }
 
-    protected synchronized void buildGoogleApiClient()
-    {
-            googleApiClient = new GoogleApiClient.Builder(LocationBasedTask.this)
-                    .addConnectionCallbacks(LocationBasedTask.this)
-                    .addOnConnectionFailedListener(LocationBasedTask.this)
-                    .addApi(LocationServices.API)
-                    .build();
+    protected synchronized void buildGoogleApiClient() {
+        googleApiClient = new GoogleApiClient.Builder(LocationBasedTask.this)
+                .addConnectionCallbacks(LocationBasedTask.this)
+                .addOnConnectionFailedListener(LocationBasedTask.this)
+                .addApi(LocationServices.API)
+                .build();
 
-            googleApiClient.connect();
+        googleApiClient.connect();
 
 
     }
@@ -213,38 +232,112 @@ public class LocationBasedTask extends FragmentActivity implements
     @Override
     public void onLocationChanged(@NonNull Location location) {
         lastlocation = location;
-        if (currentuserlocationmarker !=null)
-        {
+        if (currentuserlocationmarker != null) {
             currentuserlocationmarker.remove();
         }
 
-        LatLng latLng = new LatLng(location.getLatitude(),location.getLongitude());
+        LatLng latLng = new LatLng(location.getLatitude(), location.getLongitude());
         MarkerOptions markerOptions = new MarkerOptions().position(latLng).title("My Location")
                 .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE));
         currentuserlocationmarker = mMap.addMarker(markerOptions);
         mMap.moveCamera(CameraUpdateFactory.newLatLng(latLng));
         mMap.animateCamera(CameraUpdateFactory.zoomBy(12));
 
-        if (googleApiClient!=null)
-        {
+
+        if (googleApiClient != null) {
             LocationServices.FusedLocationApi.removeLocationUpdates(googleApiClient, (com.google.android.gms.location.LocationListener) LocationBasedTask.this);
         }
 
+
+        double distance = calculateDistance(location.getLatitude(), location.getLongitude(), Targetlat, Targetlng);
+
+        if (distance <= 100) {
+            String notificationMessage = "Target location: " + TargetName + "\nDistance: " + distance + " meters away";
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                triggerNotification(notificationMessage);
+            }
+        }
+
     }
+
+    @RequiresApi(api = Build.VERSION_CODES.TIRAMISU)
+    private void triggerNotification(String message) {
+        NotificationCompat.Builder builder = new NotificationCompat.Builder(this, "your_channel_id")
+                .setSmallIcon(R.drawable.tasklogo)
+                .setContentTitle("Task Notification")
+                .setContentText(message)
+                .setPriority(NotificationCompat.PRIORITY_DEFAULT);
+
+        // Trigger the notification
+        NotificationManagerCompat notificationManager = NotificationManagerCompat.from(this);
+        if (ActivityCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
+            notificationManager.notify(1, builder.build());
+        }
+        else
+        {
+            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.POST_NOTIFICATIONS}, Request_user_location_code);
+        }
+
+    }
+
+
+//    private void triggerNotification(String message) {
+//        if (notificationManager == null) {
+//            notificationManager = (NotificationManager) getSystemService(Context.NOTIFICATION_SERVICE);
+//        }
+//
+//        // Create notification channel (required for Android Oreo and above)
+//        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+//            NotificationChannel channel = new NotificationChannel(NOTIFICATION_CHANNEL_ID, "Task Notifications", NotificationManager.IMPORTANCE_HIGH);
+//            channel.setDescription("Notifications for task proximity");
+//            channel.enableLights(true);
+//            channel.setLightColor(Color.RED);
+//            notificationManager.createNotificationChannel(channel);
+//        }
+//
+//        // Create the notification
+//        Notification.Builder builder;
+//        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+//            builder = new Notification.Builder(this, NOTIFICATION_CHANNEL_ID);
+//        } else {
+//            builder = new Notification.Builder(this);
+//        }
+//        builder.setContentTitle("Task Proximity Alert")
+//                .setContentText(message)
+//                .setSmallIcon(R.drawable.your_notification_icon)
+//                .setAutoCancel(true);
+//
+//        // Display the notification
+//        notificationManager.notify(NOTIFICATION_ID, builder.build());
+//    }
+//
+
 
     @Override
     public void onConnected(@Nullable Bundle bundle) {
 
         LocationRequest locationRequest = LocationRequest.create()
                 .setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY)
-                .setInterval(1000)
-                .setFastestInterval(500);
+                .setInterval(5000) // Update interval in milliseconds
+                .setFastestInterval(2000); // Fastest update interval in milliseconds
+
+
+
 
         // Check if location services are available
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
             // Request location updates using the newer FusedLocationProviderClient
-            FusedLocationProviderClient fusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
-            fusedLocationClient.requestLocationUpdates(locationRequest, locationCallback, Looper.myLooper());
+//            FusedLocationProviderClient fusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
+//            fusedLocationClient.requestLocationUpdates(locationRequest, locationCallback, Looper.myLooper());
+
+            LocationServices.getFusedLocationProviderClient(this)
+                    .requestLocationUpdates(locationRequest, new LocationCallback() {
+                        @Override
+                        public void onLocationResult(@NonNull LocationResult locationResult) {
+                            // Handle location updates
+                            onLocationChanged(locationResult.getLastLocation());
+                        }
+                    }, null);
         }
 
     }
@@ -260,6 +353,33 @@ public class LocationBasedTask extends FragmentActivity implements
     public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
 
     }
+
+
+    public double calculateDistance(double lat1, double lon1, double lat2, double lon2) {
+        // Radius of the Earth in kilometers
+        double earthRadius = 6371;
+
+        // Convert latitude and longitude values to radians
+        double lat1Rad = Math.toRadians(lat1);
+        double lon1Rad = Math.toRadians(lon1);
+        double lat2Rad = Math.toRadians(lat2);
+        double lon2Rad = Math.toRadians(lon2);
+
+        // Calculate the differences between coordinates
+        double latDiff = lat2Rad - lat1Rad;
+        double lonDiff = lon2Rad - lon1Rad;
+
+        // Calculate the distance using the Haversine formula
+        double a = Math.sin(latDiff / 2) * Math.sin(latDiff / 2) +
+                Math.cos(lat1Rad) * Math.cos(lat2Rad) *
+                        Math.sin(lonDiff / 2) * Math.sin(lonDiff / 2);
+        double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+        double distance = earthRadius * c;
+
+        // Return the distance in meters
+        return distance * 1000;
+    }
+
 
 
 
