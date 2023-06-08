@@ -24,11 +24,13 @@ import android.os.Bundle;
 import android.os.Looper;
 import android.text.TextUtils;
 import android.view.View;
+import android.widget.AutoCompleteTextView;
 import android.widget.EditText;
 import android.widget.Toast;
 
 import com.example.taskmate.Activities.Constants;
 import com.example.taskmate.Activities.MainActivity;
+import com.example.taskmate.Adapter.PlaceAutoSuggestAdapter;
 import com.example.taskmate.R;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.api.GoogleApi;
@@ -101,7 +103,8 @@ public class LocationBasedTask extends FragmentActivity implements
     public void onClick(View view)
     {
         if (view.getId() == R.id.searchaddress) {
-            EditText addressfield = findViewById(R.id.location_search);
+            AutoCompleteTextView addressfield = findViewById(R.id.location_search);
+            addressfield.setAdapter(new PlaceAutoSuggestAdapter(LocationBasedTask.this,android.R.layout.simple_list_item_1));
             String address = addressfield.getText().toString();
 
             List<Address> addressList = null;
@@ -145,7 +148,6 @@ public class LocationBasedTask extends FragmentActivity implements
             buildGoogleApiClient();
             return;
         }
-
 
 
     }
