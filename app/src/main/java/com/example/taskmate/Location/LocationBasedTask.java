@@ -66,8 +66,10 @@ public class LocationBasedTask extends FragmentActivity implements
 
     private GoogleMap mMap;
     private ActivityLocationBasedTaskBinding binding;
+    private GoogleApiClient.Builder googleApiClientBuilder;
     private GoogleApiClient googleApiClient;
     private LocationRequest locationRequest;
+    private FusedLocationProviderClient fusedLocationProviderClient;
     private Location lastlocation;
     private Marker currentuserlocationmarker;
     private static final int Request_user_location_code = 99;
@@ -77,8 +79,9 @@ public class LocationBasedTask extends FragmentActivity implements
     private static final int NOTIFICATION_ID = 1;
     private NotificationManager notificationManager;
     private Address userAddress;
-    private Double Targetlat, Targetlng;
+    private Double Targetlat, Targetlng, userlat, userlang;
     private String TargetName;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -175,7 +178,8 @@ public class LocationBasedTask extends FragmentActivity implements
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
             mMap.setMyLocationEnabled(true);
             buildGoogleApiClient();
-            return;
+        } else {
+            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_FINE_LOCATION}, Request_user_location_code);
         }
 
 
@@ -197,29 +201,29 @@ public class LocationBasedTask extends FragmentActivity implements
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
-        switch (requestCode) {
-            case Request_user_location_code:
-                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    if (ContextCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
-                        if (googleApiClient == null) {
-                            buildGoogleApiClient();
-                        }
-                    }
-                } else {
-                    Constants.ErrorToast(this, "Permission Denied");
+        if (requestCode == Request_user_location_code) {
+            if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                // Permission granted, trigger the notification
+                double distance = calculateDistance(userlat, userlang, Targetlat, Targetlng);
+                String notificationMessage = "Target location: " + TargetName + "\nDistance: " + distance + " meters away";
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+                    triggerNotification(notificationMessage);
                 }
-                return;
+            } else {
+                // Permission denied, handle it accordingly (e.g., show an error message)
+                Constants.ErrorToast(this, "Location Permission Denied");
+            }
+            return;
         }
+
     }
 
     protected synchronized void buildGoogleApiClient() {
-        googleApiClient = new GoogleApiClient.Builder(LocationBasedTask.this)
-                .addConnectionCallbacks(LocationBasedTask.this)
-                .addOnConnectionFailedListener(LocationBasedTask.this)
-                .addApi(LocationServices.API)
-                .build();
-
-        googleApiClient.connect();
+        googleApiClientBuilder = new GoogleApiClient.Builder(this)
+                .addConnectionCallbacks(this)
+                .addOnConnectionFailedListener(this)
+                .addApi(LocationServices.API);
+        googleApiClient = googleApiClientBuilder.build();
 
 
     }
@@ -237,6 +241,8 @@ public class LocationBasedTask extends FragmentActivity implements
         }
 
         LatLng latLng = new LatLng(location.getLatitude(), location.getLongitude());
+        userlat = location.getLatitude();
+        userlang = location.getLongitude();
         MarkerOptions markerOptions = new MarkerOptions().position(latLng).title("My Location")
                 .icon(BitmapDescriptorFactory.defaultMarker(BitmapDescriptorFactory.HUE_BLUE));
         currentuserlocationmarker = mMap.addMarker(markerOptions);
@@ -244,14 +250,14 @@ public class LocationBasedTask extends FragmentActivity implements
         mMap.animateCamera(CameraUpdateFactory.zoomBy(12));
 
 
-        if (googleApiClient != null) {
-            LocationServices.FusedLocationApi.removeLocationUpdates(googleApiClient, (com.google.android.gms.location.LocationListener) LocationBasedTask.this);
+        if (googleApiClientBuilder != null) {
+            LocationServices.getFusedLocationProviderClient(this).removeLocationUpdates(locationCallback);
         }
 
 
-        double distance = calculateDistance(location.getLatitude(), location.getLongitude(), Targetlat, Targetlng);
+        double distance = calculateDistance(userlat, userlang, Targetlat, Targetlng);
 
-        if (distance <= 100) {
+        if (distance <= 500) {
             String notificationMessage = "Target location: " + TargetName + "\nDistance: " + distance + " meters away";
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
                 triggerNotification(notificationMessage);
@@ -262,7 +268,7 @@ public class LocationBasedTask extends FragmentActivity implements
 
     @RequiresApi(api = Build.VERSION_CODES.TIRAMISU)
     private void triggerNotification(String message) {
-        NotificationCompat.Builder builder = new NotificationCompat.Builder(this, "your_channel_id")
+        NotificationCompat.Builder builder = new NotificationCompat.Builder(this, NOTIFICATION_CHANNEL_ID)
                 .setSmallIcon(R.drawable.tasklogo)
                 .setContentTitle("Task Notification")
                 .setContentText(message)
@@ -271,13 +277,8 @@ public class LocationBasedTask extends FragmentActivity implements
         // Trigger the notification
         NotificationManagerCompat notificationManager = NotificationManagerCompat.from(this);
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
-            notificationManager.notify(1, builder.build());
+        notificationManager.notify(NOTIFICATION_ID, builder.build());
         }
-        else
-        {
-            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.POST_NOTIFICATIONS}, Request_user_location_code);
-        }
-
     }
 
 
@@ -328,7 +329,7 @@ public class LocationBasedTask extends FragmentActivity implements
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
             // Request location updates using the newer FusedLocationProviderClient
 //            FusedLocationProviderClient fusedLocationClient = LocationServices.getFusedLocationProviderClient(this);
-//            fusedLocationClient.requestLocationUpdates(locationRequest, locationCallback, Looper.myLooper());
+//           fusedLocationProviderClient.requestLocationUpdates(locationRequest, locationCallback, Looper.myLooper());
 
             LocationServices.getFusedLocationProviderClient(this)
                     .requestLocationUpdates(locationRequest, new LocationCallback() {
@@ -379,11 +380,4 @@ public class LocationBasedTask extends FragmentActivity implements
         // Return the distance in meters
         return distance * 1000;
     }
-
-
-
-
-
-
-
 }
